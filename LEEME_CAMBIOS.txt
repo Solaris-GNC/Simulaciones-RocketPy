@@ -1,0 +1,37 @@
+CAMBIOS EN LA SIMULACION DE ADRIAN (03/10/2026)
+
+1. CD_MachOFF.txt  -> CORREGIDO. Tenia las columnas al reves (Cd, Mach). RocketPy espera (Mach, Cd).
+   Leido al reves, en el planeo usaba Cd ~0.05-0.13 en vez de ~0.45 y el apogeo se inflaba
+   (con viento nominal: 500 m con el fichero malo, 403 m con el bueno). El primer punto (Mach 0)
+   tenia Cd = 0; se ha puesto el valor de Mach 0.02.
+2. CD_MachOn.txt   -> sin cambios (ya estaba en orden Mach, Cd). OJO: da mas resistencia con motor
+   encendido (~0.47) que apagado (~0.44); normalmente es al reves. Revisar de donde sale.
+3. NACA0018_Cl_Alpha.txt -> curva de la aleta real: raiz NACA 0018, punta NACA 0012 (mezcla a lo largo
+   de la envergadura ponderada por cuerda, Re de maxima presion dinamica). Mismo nombre de fichero
+   para no tocar el codigo. RocketPy solo usa la pendiente en 0 grados: 0.1056 /grado.
+4. Notebook: paracaidas = Klima 125 cm (cd_s = 0.98 m2) y despliegue a los 8 s del apagado del motor
+   (antes: cd_s = 0.8 en el apogeo). Celda nueva justo antes del paracaidas con el disparador por tiempo.
+   Requiere RocketPy 1.10 o 1.11 (la 1.13 calcula mal la masa del motor desde el .eng y da "list index out of range").
+   El script y el notebook comprueban la version al arrancar. Para instalarla: pip install rocketpy==1.10.0
+   La masa (1.271 kg), el CdM (0.505 m) y la geometria (1.23 m) son los de Adrian, sin tocar.
+
+Con el viento nominal del TR (3.36 m/s, rail 87 grados, 2.5 m) el apogeo sale ~401 m.
+El atmosferico "windy" del notebook da el pronostico del dia que se ejecute: el resultado cambia cada dia.
+
+5. PUMEL_v3-7_Klima.ork (OpenRocket 24.12) -> el .ork bueno (v3-6) con todo lo del TR:
+   paracaidas Klima 125 cm (Cd 0.8, 10 cordajes), paquete de recuperacion 119.3 g (Klima 50 g + Nomex)
+   para que la masa sin motor sea 1.271 kg, H165R con retardo 8 s, rail 2.5 m, Alcolea de Cinca (192 m).
+   Dos simulaciones ya calculadas y guardadas (ver estabilidad: Plot / Stability vs. time):
+     - "Simulation 6 - Nominal (3.36 m/s, 3 deg)": apogeo 391 m, margen estatico 2.11 cal (2.39 sin propelente)
+     - "Simulation 6 - Adverse (8.9 m/s, 20 deg)": apogeo 310 m, aviso de despliegue a alta velocidad
+   Si se vuelven a ejecutar en OpenRocket, el viento turbulento cambia de semilla y las cifras varian ~1 m.
+   (El rocket.ork de esta carpeta es OTRO cohete antiguo; no usar.)
+
+6. Montecarlo_Viradinha.py -> Monte Carlo del TR (RocketPy 1.10), con los ficheros de esta carpeta:
+     python Montecarlo_Viradinha.py nom      (nominal: viento 3.36 m/s, rail 87 grados)
+     python Montecarlo_Viradinha.py adv      (adverso: viento 8.9 m/s, rail 70 grados)
+   200 simulaciones por escenario (~20 s cada uno). Dispersiones = tabla del TR (viento +-10 %, inclinacion,
+   rumbo, rail, masa 1.271 +-5 %, CdM 0.505 +-1 %, geometria <1 %, Cd*S del Klima +-6 %).
+   Salida en montecarlo_nom/ y montecarlo_adv/: mc_resumen.json (apogeo sobre el suelo, deriva, velocidad
+   de impacto: media, percentiles 2.5/97.5, min, max) y Figura_10..18.png con el formato del TR.
+   Resultados del TR: nominal apogeo medio 401 m, deriva media 185 m; adverso 324 m y 228 m.
