@@ -1,0 +1,15 @@
+# Resultados generados por las simulaciones
+montecarlo_*/
+*_flight_data.csv
+
+# Python / Jupyter
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+.venv/
+venv/
+
+# OpenRocket / editores
+*.ork.bak
+.vscode/
+.DS_Store

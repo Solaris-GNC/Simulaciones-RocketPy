@@ -71,25 +71,25 @@ env.set_atmospheric_model(type="custom_atmosphere", wind_u=WX, wind_v=WY)
 stochastic_env = StochasticEnvironment(environment=env, wind_velocity_x_factor=(1, 0.10),
                                        wind_velocity_y_factor=(1, 0.10))
 
-motor = GenericMotor.load_from_eng_file(os.path.join(SRC, "AeroTech_H165R.eng"))
+motor = GenericMotor.load_from_eng_file(os.path.join(SRC, "datos", "motores", "AeroTech_H165R.eng"))
 T_BURN = motor.burn_out_time
 def retardo(p, h, y):
     return _T["t"] >= T_BURN + DELAY
 
 stochastic_motor = StochasticGenericMotor(motor)
 rocket = Rocket(radius=0.0787 / 2, mass=1.271, inertia=(0.451, 0.451, 0.004),
-                power_off_drag=os.path.join(D, "CD_MachOFF.txt"), power_on_drag=os.path.join(D, "CD_MachOn.txt"),
+                power_off_drag=os.path.join(D, "datos", "aero", "CD_MachOFF.txt"), power_on_drag=os.path.join(D, "datos", "aero", "CD_MachOn.txt"),
                 center_of_mass_without_motor=0.505, coordinate_system_orientation="tail_to_nose")
 rocket.add_motor(motor, position=0.03)
 rocket.set_rail_buttons(upper_button_position=0.755, lower_button_position=0.085, angular_position=45)
 nose = rocket.add_nose(length=0.230, kind="von karman", position=1.23, base_radius=0.0787 / 2)
 fins = rocket.add_trapezoidal_fins(n=4, root_chord=0.11, tip_chord=0.04, span=0.072, sweep_length=0.07,
-                                   position=0.11, airfoil=(os.path.join(D, "NACA0018_Cl_Alpha.txt"), "degrees"))
+                                   position=0.11, airfoil=(os.path.join(D, "datos", "aero", "NACA0018_Cl_Alpha.txt"), "degrees"))
 tail = rocket.add_tail(top_radius=0.0787 / 2, bottom_radius=0.078699 / 2, length=0.05, position=0.05)
 main = rocket.add_parachute(name="Klima 125 cm", cd_s=CDS, trigger=retardo, sampling_rate=60, lag=0.001)
 
 srocket = StochasticRocket(rocket=rocket, radius=(0.0787 / 2, 0.0004, "normal"), mass=(1.271, 0.0636, "normal"),
-                           power_off_drag=[os.path.join(D, "CD_MachOFF.txt")], power_on_drag=[os.path.join(D, "CD_MachOn.txt")],
+                           power_off_drag=[os.path.join(D, "datos", "aero", "CD_MachOFF.txt")], power_on_drag=[os.path.join(D, "datos", "aero", "CD_MachOn.txt")],
                            center_of_mass_without_motor=(0.505, 0.00505, "normal"))
 srocket.add_motor(stochastic_motor, position=(0.03, 0.005, "normal"))
 srocket.add_nose(StochasticNoseCone(nosecone=nose, length=(0.230, 0.0023, "normal"), base_radius=(0.0787 / 2, 0.0004, "normal")))
