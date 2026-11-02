@@ -6,14 +6,14 @@ import datetime
 env.set_date((2026, 7, 15, 12))  
 env.set_atmospheric_model(type="windy", file="ECMWF")
 
-Viradinha_motor = GenericMotor.load_from_eng_file("Cesaroni_176H123.eng")
+Viradinha_motor = GenericMotor.load_from_eng_file("datos/motores/Cesaroni_176H123.eng")
 
 Viradinha = Rocket(
     radius=0.0787/2,
     mass=1.596,   #1624-228 del motor
     inertia=(0.451, 0.451, 0.004),
-    power_off_drag="CD_MachOFF.txt",
-    power_on_drag="CD_MachOn.txt",
+    power_off_drag="datos/aero/CD_MachOFF.txt",
+    power_on_drag="datos/aero/CD_MachOn.txt",
     center_of_mass_without_motor=0.446,
     coordinate_system_orientation="tail_to_nose",
 )
@@ -40,7 +40,7 @@ fin_set = Viradinha.add_trapezoidal_fins(
     span=0.072,
     sweep_length=0.094,
     position=0.11,
-    airfoil=("NACA0018_Cl_Alpha.txt", "degrees"),
+    airfoil=("datos/aero/NACA0018_Cl_Alpha.txt", "degrees"),
 )
 
 tail = Viradinha.add_tail(
