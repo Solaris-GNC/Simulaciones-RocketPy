@@ -1,95 +1,51 @@
-from rocketpy import Environment, GenericMotor, Rocket, Flight
+"""Relacion empuje/peso (TWR) del Viradinha MKII con el AeroTech H165R.
 
-env = Environment(latitude=41.726083, longitude=0.111083, elevation=192)
+Mismo cohete que Simulacion_Viradinha.ipynb (masa 1.271 kg sin motor, CdM 0.505 m).
+El TWR solo depende del motor y de la masa, asi que no hace falta simular el vuelo.
+Uso: python SimuTWR.py
+Requiere RocketPy 1.10: pip install rocketpy==1.10.0
+"""
+import os
+import numpy as np
+import matplotlib.pyplot as plt
+import importlib.metadata as _md
+_v = _md.version("rocketpy")
+if not (_v.startswith("1.10") or _v.startswith("1.11")):
+    raise SystemExit(f"Tienes RocketPy {_v}. Este codigo esta probado con 1.10 y 1.11 (la 1.13 calcula mal la masa del "
+                     "motor desde el .eng y falla con 'list index out of range'). Instala: pip install rocketpy==1.10.0")
+from rocketpy import GenericMotor, Rocket
 
-import datetime
-env.set_date((2026, 7, 15, 12))  
-env.set_atmospheric_model(type="windy", file="ECMWF")
+D = os.path.dirname(os.path.abspath(__file__))
 
-Viradinha_motor = GenericMotor.load_from_eng_file("datos/motores/Cesaroni_176H123.eng")
+Viradinha_motor = GenericMotor.load_from_eng_file(os.path.join(D, "datos", "motores", "AeroTech_H165R.eng"))
 
 Viradinha = Rocket(
     radius=0.0787/2,
-    mass=1.596,   #1624-228 del motor
+    mass=1.271, #sin motor
     inertia=(0.451, 0.451, 0.004),
-    power_off_drag="datos/aero/CD_MachOFF.txt",
-    power_on_drag="datos/aero/CD_MachOn.txt",
-    center_of_mass_without_motor=0.446,
+    power_off_drag=os.path.join(D, "datos", "aero", "CD_MachOFF.txt"),
+    power_on_drag=os.path.join(D, "datos", "aero", "CD_MachOn.txt"),
+    center_of_mass_without_motor=0.505,
     coordinate_system_orientation="tail_to_nose",
 )
-
-Viradinha.add_motor(Viradinha_motor, position=0)
-
-rail_buttons = Viradinha.set_rail_buttons(
-    upper_button_position=0.555,
-    lower_button_position=0.05,
-    angular_position=45,
-)
-
-nose_cone = Viradinha.add_nose(
-    length=0.286, 
-    kind="von karman", 
-    position=1.31, 
-    base_radius=0.0787/2
-)
-
-fin_set = Viradinha.add_trapezoidal_fins(
-    n=4,
-    root_chord=0.11,
-    tip_chord=0.04,
-    span=0.072,
-    sweep_length=0.094,
-    position=0.11,
-    airfoil=("datos/aero/NACA0018_Cl_Alpha.txt", "degrees"),
-)
-
-tail = Viradinha.add_tail(
-    top_radius=0.087/2,
-    bottom_radius=0.08699/2,
-    length=0.05,
-    position=0.05
-)
-    
-
-main = Viradinha.add_parachute(
-    name="Parachute",
-    cd_s=0.8,
-    trigger=200,      
-    sampling_rate=60,
-    lag=0,
-)
-
-Viradinha.draw()
-Viradinha.static_margin.plot()
-
-test_flight = Flight(rocket=Viradinha, environment=env, rail_length=2.3, inclination=90, heading=0)
-
-test_flight.export_data("Viradinha_flight_data.csv")
+Viradinha.add_motor(Viradinha_motor, position=0.03)
 
 #TWR
-
-
-
-
-#TWR
-import matplotlib.pyplot as plt
-
-# 1. Suponiendo que ya tienes tus objetos 'my_rocket' y 'my_flight'
-# 'my_flight' debe haber sido ejecutado: my_flight.post_process()
-
-# 2. Obtenemos los datos temporales
-times = Viradinha.out_of_burn_time_steps  # Tiempos durante la combustión
-thrust = [Viradinha.motor.thrust(t) for t in times]
-mass = [Viradinha.mass(t) for t in times]
 g = 9.80665
+times = np.linspace(0, Viradinha_motor.burn_out_time, 500)  # tiempos durante la combustion
+thrust = np.array([Viradinha_motor.thrust(t) for t in times])
+mass = np.array([Viradinha.total_mass(t) for t in times])  # cohete + motor (el propelente se va gastando)
+twr = thrust / (mass * g)
 
-# 3. Calculamos el TWR
-twr = [T / (M * g) for T, M in zip(thrust, mass)]
+print(f"Masa al despegue: {mass[0]:.3f} kg")
+print(f"TWR maximo: {twr.max():.1f} (t = {times[twr.argmax()]:.2f} s)")
+print(f"TWR medio durante la combustion: {twr.mean():.1f}")
 
-# 4. Graficar el resultado
 plt.plot(times, twr)
+plt.axhline(5, color="gray", linestyle="--", label="TWR = 5 (minimo habitual)")
 plt.xlabel('Tiempo (s)')
 plt.ylabel('Thrust-to-Weight Ratio (TWR)')
-plt.title('Evolución del TWR durante el vuelo')
+plt.title('Evolución del TWR durante la combustión (H165R)')
+plt.legend()
 plt.grid(True)
 plt.show()

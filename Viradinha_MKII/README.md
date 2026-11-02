@@ -9,11 +9,11 @@ lanzamiento en Alcolea de Cinca (192 m).
 |---|---|
 | `Simulacion_Viradinha.ipynb` | Simulación principal (atmósfera `windy`: usa el pronóstico del día en que se ejecuta) |
 | `Montecarlo_Viradinha.py` | Monte Carlo del TR, 200 simulaciones por escenario |
-| `SimuTWR.py` | Cálculo del TWR (versión antigua: usa `Cesaroni_176H123.eng`, que no está en el repo) |
+| `SimuTWR.py` | Relación empuje/peso (TWR) durante la combustión del H165R |
 | `datos/motores/AeroTech_H165R.eng` | Curva de empuje |
 | `datos/aero/CD_MachOFF.txt`, `CD_MachOn.txt` | Cd vs Mach motor apagado / encendido |
 | `datos/aero/NACA0018_Cl_Alpha.txt` | Cl vs alfa de la aleta (raíz NACA 0018, punta NACA 0012) |
-| `openrocket/` | Ficheros `.ork` (pendiente de subir `PUMEL_v3-7_Klima.ork`) |
+| `openrocket/PUMEL_v3-7_Klima.ork` | Modelo de OpenRocket 24.12 con todo lo del TR (simulaciones nominal y adversa ya calculadas) |
 | `CAMBIOS.txt` | Historial de cambios y correcciones |
 
 ## Ejecutar
